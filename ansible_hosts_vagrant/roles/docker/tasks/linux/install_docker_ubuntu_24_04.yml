@@ -2,6 +2,7 @@
 - name: Update repositories cache
   ansible.builtin.apt:
     update_cache: yes
+  when: uninstall is not defined or uninstall != "true"
 
 - name: remove old docker version
   ansible.builtin.include_tasks:
@@ -17,17 +18,20 @@
       - ca-certificates 
       - curl
       - software-properties-common
+  when: uninstall is not defined or uninstall != "true"
 
 - name: add docker's official gpg key 
   ansible.builtin.get_url:
     url: https://download.docker.com/linux/ubuntu/gpg
     dest: /etc/apt/keyrings/docker.asc
     mode: '0644'
+  when: uninstall is not defined or uninstall != "true"
 
 - name: verify the docker GPG key
   ansible.builtin.stat:
     path: /etc/apt/keyrings/docker.asc
   register: docker_gpg_key
+  when: uninstall is not defined or uninstall != "true"
 
 - name: fail if the GPG key is not present 
   ansible.builtin.assert:
@@ -35,6 +39,7 @@
       - docker_gpg_key.stat.exists
     fail_msg: "the docker GPG key does not exit"
     success_msg: "the docker GPG key is present"
+  when: uninstall is not defined or uninstall != "true"
 
       #- name: show permissions and key size 
       #  ansible.builtin.debug:
@@ -48,6 +53,7 @@
     name: python3-debian
     state: present
     update_cache: yes
+  when: uninstall is not defined or uninstall != "true"
 
 - name: add a docker repository
   ansible.builtin.deb822_repository:
@@ -59,6 +65,7 @@
     architectures: "{{ 'amd64' if ansible_architecture == 'x86_64' else 'arm64' }}"
     signed_by: /etc/apt/keyrings/docker.asc
     state: present
+  when: uninstall is not defined or uninstall != "true"
 
       #- name: collect information about installed packages
       #  ansible.builtin.package_facts:
@@ -76,11 +83,13 @@
       - containerd.io
       - docker-buildx-plugin
       - docker-compose-plugin
+  when: uninstall is not defined or uninstall != "true"
 
 - name: create docker group
   ansible.builtin.group:
     name: docker
     state: present
+  when: uninstall is not defined or uninstall != "true"
 
 - name: add user to docker group
   ansible.builtin.user:
@@ -90,14 +99,29 @@
   loop:
     - vagrant
     - ubuntu
+  when: uninstall is not defined or uninstall != "true"
+
+- name: reboot and check vms
+  ansible.builtin.reboot:
+    reboot_timeout: 600
+    test_command: whoami
+    msg: "Restart initiated by ansible"
+  register: reboot_result
+
+- name: show the total time taken by the reboot
+  ansible.builtin.debug:
+    msg: "the reboot took {{ reboot_result.elapsed }} seconds"
 
 - name: check the status of services
   ansible.builtin.service_facts:
+  when: uninstall is not defined or uninstall != "true"
 
 - name: start docker
   ansible.builtin.systemd_service:
     name: docker
     state: started
     enabled: true
-  when: ansible_facts.services['docker.service'].state != 'running'
+  when: 
+    - uninstall is not defined or uninstall != "true"
+    - ansible_facts.services['docker.service'].state != 'running'
 

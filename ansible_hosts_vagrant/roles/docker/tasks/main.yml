@@ -5,7 +5,7 @@
 
 - name: Perform task only on Ubuntu 24.04
   ansible.builtin.include_tasks:
-    file: linux/docker_ubuntu_24_04.yml
+    file: linux/install_docker_ubuntu_24_04.yml
   when:
     - ansible_distribution == "Ubuntu"
     - ansible_distribution_version == "24.04"
