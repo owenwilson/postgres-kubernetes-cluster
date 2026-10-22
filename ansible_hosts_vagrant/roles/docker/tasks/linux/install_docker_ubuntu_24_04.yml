@@ -20,7 +20,7 @@
       - software-properties-common
   when: uninstall is not defined or uninstall != "true"
 
-- name: create a folder docker
+- name: create a folder data
   ansible.builtin.file:
     # path: "{{ docker_data_root | default('/data/docker') }}"
     path: "{{ docker_data_root }}"
@@ -28,14 +28,21 @@
     mode: '0711'
   when: uninstall is not defined or uninstall != "true"
 
+- name: create the docker configuration folder
+  ansible.builtin.file:
+    path: /etc/docker
+    state: directory
+    mode: '0711'
+  when: uninstall is not defined or uninstall != "true"
+
 - name: deploy daemon.json
   ansible.builtin.template:
-    src: daemon.json.j2
+    src: ../templates/daemon.json.j2
     dest: /etc/docker/daemon.json
     owner: root
     group: root
     mode: '0644'
-  notify: Reiniciar Docker
+  notify: reboot docker
   when: uninstall is not defined or uninstall != "true"
 
 - name: add docker's official gpg key 
