@@ -20,6 +20,24 @@
       - software-properties-common
   when: uninstall is not defined or uninstall != "true"
 
+- name: create a folder docker
+  ansible.builtin.file:
+    # path: "{{ docker_data_root | default('/data/docker') }}"
+    path: "{{ docker_data_root }}"
+    state: directory
+    mode: '0711'
+  when: uninstall is not defined or uninstall != "true"
+
+- name: deploy daemon.json
+  ansible.builtin.template:
+    src: daemon.json.j2
+    dest: /etc/docker/daemon.json
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Reiniciar Docker
+  when: uninstall is not defined or uninstall != "true"
+
 - name: add docker's official gpg key 
   ansible.builtin.get_url:
     url: https://download.docker.com/linux/ubuntu/gpg
@@ -107,10 +125,12 @@
     test_command: whoami
     msg: "Restart initiated by ansible"
   register: reboot_result
+  when: uninstall is not defined or uninstall != "true"
 
 - name: show the total time taken by the reboot
   ansible.builtin.debug:
     msg: "the reboot took {{ reboot_result.elapsed }} seconds"
+  when: uninstall is not defined or uninstall != "true"
 
 - name: check the status of services
   ansible.builtin.service_facts:

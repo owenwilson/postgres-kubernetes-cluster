@@ -8,6 +8,7 @@
       - docker-ce
       - docker-engine
       - docker-ce-cli
+      - docker-doc
       - containerd.io
       - docker-buildx-plugin
       - docker-compose-plugin
@@ -19,3 +20,22 @@
     path: /usr/bin/docker-compose
     state: absent
 
+- name: Remove old docker folder
+  ansible.builtin.file:
+    path: /var/lib/docker
+    state: absent
+
+- name: Remove old containerd
+  ansible.builtin.file:
+    path: /var/lib/containerd
+    state: absent
+
+- name: Remove docker.source file
+  ansible.builtin.file:
+    path: /etc/apt/sources.list.d/docker.sources
+    state: absent
+
+- name: Remove docker.asc file
+  ansible.builtin.file:
+    path: /etc/apt/keyrings/docker.asc
+    state: absent
