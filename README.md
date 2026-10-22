@@ -1,4 +1,4 @@
-# postgresl - kuberentes - cluster
+# postgresl - kubernetes - cluster
 
 ## setup
 
@@ -17,6 +17,22 @@ vagrant init
 ```sh
 vagrant up
 ```
+
+## ansible
+
+- clean old docker version
+
+```sh
+ansible-playbook ./ansible_hosts_vagrant/site.yml -i ./ansible_hosts_vagrant/hosts_inventory -t docker -e uninstall=true
+```
+
+- install docker
+
+```sh
+ansible-playbook ./ansible_hosts_vagrant/site.yml -i ./ansible_hosts_vagrant/hosts_inventory -t docker
+```
+
+- install kubernetes
 
 ## reference links
 
