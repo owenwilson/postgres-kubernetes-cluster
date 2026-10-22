@@ -1,0 +1,103 @@
+---
+- name: Update repositories cache
+  ansible.builtin.apt:
+    update_cache: yes
+
+- name: remove old docker version
+  ansible.builtin.include_tasks:
+    file: ./uninstall_docker.yml
+  when: 
+    - uninstall is defined
+    - uninstall == "true"
+
+- name: Install dependencies
+  ansible.builtin.apt:
+    pkg:
+      - apt-transport-https
+      - ca-certificates 
+      - curl
+      - software-properties-common
+
+- name: add docker's official gpg key 
+  ansible.builtin.get_url:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    dest: /etc/apt/keyrings/docker.asc
+    mode: '0644'
+
+- name: verify the docker GPG key
+  ansible.builtin.stat:
+    path: /etc/apt/keyrings/docker.asc
+  register: docker_gpg_key
+
+- name: fail if the GPG key is not present 
+  ansible.builtin.assert:
+    that:
+      - docker_gpg_key.stat.exists
+    fail_msg: "the docker GPG key does not exit"
+    success_msg: "the docker GPG key is present"
+
+      #- name: show permissions and key size 
+      #  ansible.builtin.debug:
+      #    msg:
+      #      - "Modo: {{ docker_gpg_key.stat_mode }}"
+      #      - "Size: {{ docker_gpg_key.stat.size }} bytes"
+      #  when: docker_gpg_key.stat.exists
+
+- name: add dependencie python3-debian for deb822
+  ansible.builtin.apt:
+    name: python3-debian
+    state: present
+    update_cache: yes
+
+- name: add a docker repository
+  ansible.builtin.deb822_repository:
+    name: docker
+    types: deb
+    uris: https://download.docker.com/linux/ubuntu
+    suites: "{{ ansible_distribution_release }}"
+    components: stable
+    architectures: "{{ 'amd64' if ansible_architecture == 'x86_64' else 'arm64' }}"
+    signed_by: /etc/apt/keyrings/docker.asc
+    state: present
+
+      #- name: collect information about installed packages
+      #  ansible.builtin.package_facts:
+      #    managers: auto
+
+      #- name: show packages that contain docker in their names
+      #  ansible.builtin.debug:
+      #    msg: "{{ ansible_facts.packages | dict2items | selectattr('key', 'search', 'docker') | map(attribute='key') | list }}"
+
+- name: install docker-ce
+  ansible.builtin.apt:
+    pkg:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+
+- name: create docker group
+  ansible.builtin.group:
+    name: docker
+    state: present
+
+- name: add user to docker group
+  ansible.builtin.user:
+    name: "{{ item }}"
+    groups: docker
+    append: yes
+  loop:
+    - vagrant
+    - ubuntu
+
+- name: check the status of services
+  ansible.builtin.service_facts:
+
+- name: start docker
+  ansible.builtin.systemd_service:
+    name: docker
+    state: started
+    enabled: true
+  when: ansible_facts.services['docker.service'].state != 'running'
+

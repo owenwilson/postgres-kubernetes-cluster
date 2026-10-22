@@ -1,0 +1,7 @@
+---
+- hosts: docker
+  user: vagrant
+  become: yes
+  roles:
+    - docker
+  tags: docker

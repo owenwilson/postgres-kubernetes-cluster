@@ -1,0 +1,11 @@
+---
+- name: Show the OS distrubution and version
+  ansible.builtin.debug:
+    msg: "This server is running {{ ansible_distribution }} version {{ ansible_distribution_version }}"
+
+- name: Perform task only on Ubuntu 24.04
+  ansible.builtin.include_tasks:
+    file: linux/docker_ubuntu_24_04.yml
+  when:
+    - ansible_distribution == "Ubuntu"
+    - ansible_distribution_version == "24.04"

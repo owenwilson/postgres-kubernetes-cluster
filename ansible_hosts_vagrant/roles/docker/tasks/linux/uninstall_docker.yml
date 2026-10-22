@@ -1,0 +1,19 @@
+---
+- name: Clean old docker version
+  ansible.builtin.apt:
+    autoremove: yes
+    purge: yes
+    state: absent
+    pkg:
+      - docker-ce
+      - docker-engine
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+
+- name: Remove docker-compose old version
+  ansible.builtin.file:
+    path: /usr/bin/docker-compose
+    state: absent
+
