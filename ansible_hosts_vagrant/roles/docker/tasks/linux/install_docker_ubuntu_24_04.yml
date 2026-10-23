@@ -1,8 +1,8 @@
 ---
-- name: Update repositories cache
-  ansible.builtin.apt:
-    update_cache: yes
-  when: uninstall is not defined or uninstall != "true"
+#- name: Update repositories cache
+#  ansible.builtin.apt:
+#    update_cache: yes
+#  when: uninstall is not defined or uninstall != "true"
 
 - name: remove old docker version
   ansible.builtin.include_tasks:
@@ -42,7 +42,7 @@
     owner: root
     group: root
     mode: '0644'
-  notify: reboot docker
+  #notify: reboot-docker #--> roles/docker/handlers/main.yml
   when: uninstall is not defined or uninstall != "true"
 
 - name: add docker's official gpg key 
@@ -90,7 +90,12 @@
     architectures: "{{ 'amd64' if ansible_architecture == 'x86_64' else 'arm64' }}"
     signed_by: /etc/apt/keyrings/docker.asc
     state: present
+  #notify: update-cache #--> roles/docker/handlers/main.yml
   when: uninstall is not defined or uninstall != "true"
+
+- name: update-cache
+  ansible.builtin.apt:
+    update_cache: yes
 
       #- name: collect information about installed packages
       #  ansible.builtin.package_facts:
