@@ -1,4 +1,78 @@
 ---
-- name: Update repositories cache
+# vars:
+#   k8s_version: "v1.37"
+
+- name: reset all kubernetes nodes
+  ansible.builtin.include_tasks:
+    file: ./uninstall_kubernetes_ubuntu_24_04.yml
+  when: 
+    - uninstall is defined
+    - uninstall == "true"
+
+- name: install dependencies
+  ansible.builtin.apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gpg
+    state: present
+  when: uninstall is not defined or uninstall != "true"
+
+- name: create folder /etc/apt/keyrings
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: '0755'
+  when: uninstall is not defined or uninstall != "true"
+
+- name: download key GPG Kubernetes
+  ansible.builtin.get_url:
+    url: "https://pkgs.k8s.io/core:/stable:/{{ k8s_version }}/deb/Release.key"
+    dest: /tmp/kubernetes-release.key
+    mode: '0644'
+  when: uninstall is not defined or uninstall != "true"
+
+- name: convert gpg key to keyring
+  ansible.builtin.shell: |
+    gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg /tmp/kubernetes-release.key
+  args:
+    creates: /etc/apt/keyrings/kubernetes-apt-keyring.gp
+  when: uninstall is not defined or uninstall != "true"
+
+- name: add repositorie APT Kubernetes
+  ansible.builtin.copy:
+    dest: /etc/apt/sources.list.d/kubernetes.list
+    content: |
+      deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/{{ k8s_version }}/deb/ /
+    mode: '0644'
+  when: uninstall is not defined or uninstall != "true"
+
+- name: update cache
   ansible.builtin.apt:
     update_cache: yes
+  when: uninstall is not defined or uninstall != "true"
+
+- name: install kubelet kubeadm kubectl
+  ansible.builtin.apt:
+    name:
+      - kubelet
+      - kubeadm
+      - kubectl
+    state: present
+  when: uninstall is not defined or uninstall != "true"
+
+- name: Bloquear versiones de paquetes de Kubernetes
+  ansible.builtin.dpkg_selections:
+    name: "{{ item }}"
+    selection: hold
+  loop:
+    - kubelet
+    - kubeadm
+    - kubectl
+  when: uninstall is not defined or uninstall != "true"
+
+- name: Deshabilitar swap (kubelet no puede iniciarse con swap activado)
+  ansible.builtin.command: swapoff -a
+  changed_when: false
+  when: uninstall is not defined or uninstall != "true"
