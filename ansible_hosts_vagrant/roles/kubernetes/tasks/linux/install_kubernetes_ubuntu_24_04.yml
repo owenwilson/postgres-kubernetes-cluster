@@ -62,7 +62,7 @@
     state: present
   when: uninstall is not defined or uninstall != "true"
 
-- name: Bloquear versiones de paquetes de Kubernetes
+- name: lock kubernetes package versions
   ansible.builtin.dpkg_selections:
     name: "{{ item }}"
     selection: hold
@@ -72,7 +72,7 @@
     - kubectl
   when: uninstall is not defined or uninstall != "true"
 
-- name: Deshabilitar swap (kubelet no puede iniciarse con swap activado)
+- name: disable swap
   ansible.builtin.command: swapoff -a
   changed_when: false
   when: uninstall is not defined or uninstall != "true"
