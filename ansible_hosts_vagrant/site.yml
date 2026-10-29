@@ -5,3 +5,10 @@
   roles:
     - docker
   tags: docker
+
+- hosts: kubernetes
+  user: vagrant
+  become: yes
+  roles:
+    - kubernetes
+  tags: kubernetes
