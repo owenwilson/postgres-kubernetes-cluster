@@ -7,7 +7,7 @@
 #     - uninstall == "true"
 
 - name: kubeadm uninstall all nodos
-  ansible.builtin.command: kubeadm uninstall -f
+  ansible.builtin.command: kubeadm reset -f
   ignore_errors: yes
 
 - name: clear CNI configuration
