@@ -19,7 +19,15 @@
   ansible.builtin.file:
     path: "/home/{{ ansible_user }}/.kube"
     state: absent
-  
+
+- name: delete the kubernetes repository configuration and the GPG key
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /etc/apt/sources.list.d/kubernetes.list
+    - /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+
 - name: unlock package version
   ansible.builtin.dpkg_selections:
     name: "{{ item }}"
