@@ -76,3 +76,12 @@
   ansible.builtin.command: swapoff -a
   changed_when: false
   when: uninstall is not defined or uninstall != "true"
+
+- name: retrieve information about installed packages
+  ansible.builtin.package_facts:
+    manager: auto
+  when: uninstall is not defined or uninstall != "true"
+
+- name: show installed kubernetes packages
+  ansible.builtin.debug:
+    msg: "show installed packages: {{ ansible_facts.packages.keys() | select('search' , 'kube' ) | list }}"
