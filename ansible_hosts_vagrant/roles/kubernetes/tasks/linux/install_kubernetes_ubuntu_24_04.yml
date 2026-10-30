@@ -37,7 +37,7 @@
   ansible.builtin.shell: |
     gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg /tmp/kubernetes-release.key
   args:
-    creates: /etc/apt/keyrings/kubernetes-apt-keyring.gp
+    creates: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
   when: uninstall is not defined or uninstall != "true"
 
 - name: add repositorie APT Kubernetes
