@@ -27,7 +27,7 @@
   loop:
     - kubelet
     - kubeadm
-    - kubect
+    - kubectl
   
 - name: uninstall packages kubernetes
   ansible.builtin.apt:
