@@ -85,3 +85,4 @@
 - name: show installed kubernetes packages
   ansible.builtin.debug:
     msg: "show installed packages: {{ ansible_facts.packages.keys() | select('search' , 'kube' ) | list }}"
+  when: uninstall is not defined or uninstall != "true"

@@ -1,0 +1,52 @@
+---
+# - name: reset all kubernetes nodes
+#   ansible.builtin.include_tasks:
+#     file: ./reset_cluster_kubernetes.yml
+#   when: 
+#     - uninstall is defined
+#     - uninstall == "true"
+
+- name: kubeadm uninstall all nodos
+  ansible.builtin.command: kubeadm uninstall -f
+  ignore_errors: yes
+
+- name: clear CNI configuration
+  ansible.builtin.file:
+    path: /etc/cni/net.d
+    state: absent
+
+- name: clear .kube of user
+  ansible.builtin.file:
+    path: "/home/{{ ansible_user }}/.kube"
+    state: absent
+  
+- name: unlock package version
+  ansible.builtin.dpkg_selections:
+    name: "{{ item }}"
+    selection: install
+  loop:
+    - kubelet
+    - kubeadm
+    - kubect
+  
+- name: uninstall packages kubernetes
+  ansible.builtin.apt:
+    name:
+      - kubelet
+      - kubeadm
+      - kubectl
+    state: absent
+    purge: yes
+    autoremove: yes
+
+- name: retrieve information about installed packages
+  ansible.builtin.package_facts:
+    manager: auto
+
+- name: show installed kubernetes packages
+  ansible.builtin.debug:
+    msg: "show installed packages: {{ ansible_facts.packages.keys() | select('search' , 'kube' ) | list }}"
+
+- name: update cache
+  ansible.builtin.apt:
+    update_cache: yes
