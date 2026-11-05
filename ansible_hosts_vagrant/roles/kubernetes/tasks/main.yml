@@ -9,3 +9,25 @@
   when:
     - ansible_distribution == "Ubuntu"
     - ansible_distribution_version == "24.04"
+
+- name: initialize the master node with kubeadm
+  ansible.builtin.include_tasks:
+    file: linux/init_master.yml
+  when:
+    - inventory_hostname in groups['master']
+    - init_node is defined
+    - init_node == 'masters'
+
+- name: Unir workers cuando se solicite explícitamente
+  ansible.builtin.include_tasks:
+    file: linux/join_workers.yml
+  when:
+    - inventory_hostname in groups['workers']
+    - init_node is defined
+    - init_node == 'workers'
+
+# - name: Initialize the master node with kubeadm
+#   ansible.builtin.include_tasks:
+#     file: linux/init_master.yml
+    # groups['master'][0]
+#   when: inventory_hostname in groups['master']

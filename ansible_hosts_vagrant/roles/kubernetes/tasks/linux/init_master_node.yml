@@ -1,0 +1,44 @@
+---
+- name: initialice control-plane with kubeadm
+  ansible.builtin.command: kubeadm init --pod-network-cidr=10.244.0.0/16
+  args:
+    creates: /etc/kubernetes/admin.conf
+
+- name: create folder .kube for currently user
+  ansible.builtin.file:
+    path: "/home/{{ ansible_user }}/.kube"
+    state: directory
+    mode: '0755'
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+
+- name: copy admin.conf to currently user
+  ansible.builtin.copy:
+    src: /etc/kubernetes/admin.conf
+    dest: "/home/{{ ansible_user }}/.kube/config"
+    remote_src: yes
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0600'
+
+- name: install the pod network pod (Flannel for example)
+  ansible.builtin.command: kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml
+  environment:
+    KUBECONFIG: "/home/{{ ansible_user }}/.kube/config"
+
+- name: get the join command for workers
+  ansible.builtin.command: kubeadm token create --print-join-command
+  register: join_command
+  changed_when: false
+
+- name: save the join command to a global variable
+  ansible.builtin.set_fact:
+    kubeadm_join_cmd: "{{ join_command.stdout }}"
+
+- name: save the join command to a file for later use
+  ansible.builtin.copy:
+    content: "{{ kubeadm_join_cmd }}\n"
+    dest: "/home/{{ ansible_user }}/join-workers.txt"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0600'
