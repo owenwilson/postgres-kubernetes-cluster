@@ -12,7 +12,7 @@
 
 - name: initialize the master node with kubeadm
   ansible.builtin.include_tasks:
-    file: linux/init_master.yml
+    file: linux/init_master_node.yml
   when:
     - inventory_hostname in groups['master']
     - init_node is defined
