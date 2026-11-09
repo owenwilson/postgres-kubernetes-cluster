@@ -1,6 +1,6 @@
 ---
 - name: initialice control-plane with kubeadm
-  ansible.builtin.command: kubeadm init --pod-network-cidr=10.244.0.0/16
+  ansible.builtin.command: kubeadm init --pod-network-cidr=10.244.0.0/16 --cri-socket unix:///run/containerd/containerd.sock
   args:
     creates: /etc/kubernetes/admin.conf
 
