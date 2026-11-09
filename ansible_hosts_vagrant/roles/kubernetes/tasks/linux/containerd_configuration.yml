@@ -17,8 +17,8 @@
 - name: enable SystemCgroup in containerd
   ansible.builtin.replace:
     path: /etc/containerd/config.toml
-    regexp: 'SystemCgroup = false'
-    replace: 'SystemCgroup = true'
+    regexp: 'SystemdCgroup = false'
+    replace: 'SystemdCgroup = true'
 
 - name: restart and enable containerd
   ansible.builtin.systemd_service:
