@@ -1,0 +1,32 @@
+---
+- name: stop containerd
+  ansible.builtin.systemd_service:
+    name: containerd
+    state: absent
+
+- name: delete old configuration of containerd
+  ansible.builtin.file:
+    path: /etc/containerd/config.toml
+    state: absent
+
+- name: generate default configuration containerd
+  ansible.builtin.shell: containerd config default > /etc/containerd/config.toml
+  args:
+    creates: /etc/containerd/config.toml
+
+- name: enable SystemCgroup in containerd
+  ansible.builtin.replace:
+    path: /etc/containerd/config.toml
+    regexp: 'SystemCgroup = false'
+    replace: 'SystemCgroup = true'
+
+- name: restart and enable containerd
+  ansible.builtin.systemd_service:
+    name: containerd
+    state: restarted
+    enabled: yes
+
+- name: install cri-tools
+  ansible.builtin.apt:
+    name: cri-tools
+    state: present

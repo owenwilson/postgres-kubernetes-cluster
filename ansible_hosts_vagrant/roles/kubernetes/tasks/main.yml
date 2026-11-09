@@ -10,6 +10,13 @@
     - ansible_distribution == "Ubuntu"
     - ansible_distribution_version == "24.04"
 
+- name: configure containerd for kubernetes
+  ansible.builtin.include_tasks:
+    file: linux/containerd_configuration.yml
+  when:
+    - ansible_distribution == "Ubuntu"
+    - ansible_distribution_version == "24.04"
+
 - name: initialize the master node with kubeadm
   ansible.builtin.include_tasks:
     file: linux/init_master_node.yml
