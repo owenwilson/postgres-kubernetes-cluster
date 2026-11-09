@@ -6,7 +6,7 @@
     - docker
   tags: docker
 
-- hosts: kubernetes
+- hosts: k8s_cluster
   user: vagrant
   become: yes
   roles:
