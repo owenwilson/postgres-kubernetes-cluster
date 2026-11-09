@@ -9,18 +9,26 @@
     path: /etc/containerd/config.toml
     state: absent
 
+- name: check whether the containerd configuration exists
+  ansible.builtin.stat:
+    path: /etc/containerd/config.toml
+  register: containerd_config
+
 - name: generate default configuration containerd
   ansible.builtin.shell: containerd config default > /etc/containerd/config.toml
   args:
     creates: /etc/containerd/config.toml
+  when: not containerd_config.stat.exists
+  notify: restart containerd
 
 - name: enable SystemCgroup in containerd
   ansible.builtin.replace:
     path: /etc/containerd/config.toml
     regexp: 'SystemdCgroup = false'
     replace: 'SystemdCgroup = true'
+  notify: restart containerd
 
-- name: restart and enable containerd
+- name: restart containerd
   ansible.builtin.systemd_service:
     name: containerd
     state: restarted
