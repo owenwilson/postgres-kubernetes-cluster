@@ -2,7 +2,7 @@
 - name: stop containerd
   ansible.builtin.systemd_service:
     name: containerd
-    state: sttoped
+    state: stopped
 
 - name: delete old configuration of containerd
   ansible.builtin.file:
