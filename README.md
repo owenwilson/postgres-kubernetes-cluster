@@ -20,6 +20,45 @@ vagrant up
 
 ## ansible
 
+- check the inventory groups
+- example 1
+
+```sh
+ansible-inventory -i ./ansible_hosts_vagrant/hosts_vagrant --graph
+@all:
+  |--@ungrouped:
+  |--@k8s_cluster:
+  |  |--@master:
+  |  |  |--192.168.56.10
+  |  |--@workers:
+  |  |  |--192.168.56.11
+  |  |  |--192.168.56.12
+```
+
+- example 2
+
+```sh
+ansible-inventory -i ./ansible_hosts_vagrant/hosts_inventory --graph
+@all:
+  |--@ungrouped:
+  |--@docker:
+  |  |--192.168.56.10
+  |  |--192.168.56.11
+  |  |--192.168.56.12
+  |--@kubernetes:
+  |  |--192.168.56.10
+  |  |--192.168.56.11
+  |  |--192.168.56.12
+```
+
+- list the hosts that match the tag
+
+```sh
+ansible-playbook ./ansible_hosts_vagrant/site.yml -i ./ansible_hosts_vagrant/hosts_vagrant --limit master --list-hosts
+```
+
+## docker
+
 - check docker installation
 
 ```sh
@@ -50,6 +89,18 @@ dpkg -l | grep -i kube*
 
 ```sh
 ansible-playbook ./ansible_hosts_vagrant/site.yml -i ./ansible_hosts_vagrant/hosts_inventory -t kubernetes
+```
+
+- init master node
+
+```sh
+ansible-playbook site.yml -i hosts_inventory -t kubernetes -e init_node=masters
+```
+
+- join workers
+
+```sh
+ansible-playbook site.yml -i hosts_inventory -t kubernetes -e init_node=workers
 ```
 
 - uninstall kubernetes
