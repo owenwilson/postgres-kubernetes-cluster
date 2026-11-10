@@ -1,5 +1,11 @@
+---
 - name: reboot-docker
   ansible.builtin.systemd_service:
     name: docker
     state: restarted
 
+- name: restart containerd
+  ansible.builtin.systemd_service:
+    name: containerd
+    state: restarted
+    enabled: yes

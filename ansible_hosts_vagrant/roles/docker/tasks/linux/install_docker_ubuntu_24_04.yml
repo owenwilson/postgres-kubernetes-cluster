@@ -133,7 +133,7 @@
 
 - name: reboot and check vms
   ansible.builtin.reboot:
-    reboot_timeout: 600
+    reboot_timeout: 1200
     test_command: whoami
     msg: "Restart initiated by ansible"
   register: reboot_result
@@ -146,6 +146,11 @@
 
 - name: check the status of services
   ansible.builtin.service_facts:
+  when: uninstall is not defined or uninstall != "true"
+
+- name: configure containerd
+  ansible.builtin.include_tasks:
+    file: ./containerd_configuration.yml
   when: uninstall is not defined or uninstall != "true"
 
 - name: start docker
