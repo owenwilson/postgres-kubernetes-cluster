@@ -30,14 +30,14 @@
   ansible.builtin.command: containerd config default
   register: containerd_default
   changed_when: false
-  when: not containerd_config.stat.exists
+  when: not containerd_marker.stat.exists
 
 - name: write config.toml with default configuration
   ansible.builtin.copy:
     dest: /etc/containerd/config.toml
     content: "{{ containerd_default.stdout }}"
     mode: '0644'
-  when: not containerd_config.stat.exists
+  when: not containerd_marker.stat.exists
   notify: restart containerd
 
 - name: enable SystemCgroup in containerd
