@@ -42,3 +42,9 @@
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
     mode: '0600'
+
+- name: enable kubelet service
+  ansible.builtin.systemd_service:
+    name: kubelet
+    state: started
+    enabled: yes

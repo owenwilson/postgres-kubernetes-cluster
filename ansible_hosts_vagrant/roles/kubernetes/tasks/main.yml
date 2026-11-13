@@ -18,7 +18,7 @@
     - init_node is defined
     - init_node == 'masters'
 
-- name: Unir workers cuando se solicite explícitamente
+- name: join workers
   ansible.builtin.include_tasks:
     file: linux/join_workers.yml
   when:
